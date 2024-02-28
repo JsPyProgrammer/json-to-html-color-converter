@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JSON Colorizer with HTML Code</title>
+<style>
+*{
+	box-sizing:border-box;
+}
+body{
+	margin:0px;
+}
+textarea, pre{
+	display:inline-block;
+	width:calc(100vw / 4);
+	margin:5px;
+	float:left;
+	border:1px solid black;
+	height:300px;
+	overflow:auto;
+	resize:none;
+}
+div{
+	margin-bottom:10px;
+}
+div:after{
+	content:"";
+	clear:both;
+	display:table;
+}
+button{
+	margin-left:5px;
+}
+</style>
+</head>
+<body>
+<div>
+	<textarea id="code"></textarea>
+	<pre><code id="color"></code></pre>
+	<textarea id="html"></textarea>
+</div>
+<button onclick="convert()">Convert JSON</button>
+<script>
+if (!library)
+	var library = {};
+
+library.json = {
+	replacer: function(match, pIndent, pKey, pVal, pEnd) {
+		var key = "<span style=\"color:brown;\">";
+		var val = "<span style=\"color:navy;\">";
+		var str = "<span style=\"color:olive;\">";
+		var r = pIndent || '';
+		if (pKey)
+			r = r + key + pKey.replace(/[": ]/g, '') + '</span>: ';
+		if (pVal)
+			r = r + (pVal[0] == '"' ? str : val) + pVal + '</span>';
+		return r + (pEnd || '');
+		},
+	prettyPrint: function(obj) {
+		var jsonLine = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/mg;
+		return JSON.stringify(obj, null, 3)
+			.replace(/&/g, '&amp;').replace(/\\"/g, '&quot;')
+			.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+			.replace(jsonLine, library.json.replacer);
+		}
+	};
+
+function convert(){
+	var code = document.getElementById("code"),
+		color = document.getElementById("color"),
+		html = document.getElementById("html");
+	
+	color.innerHTML = library.json.prettyPrint(JSON.parse(code.value));
+	html.value = "<pre>"+library.json.prettyPrint(JSON.parse(code.value))+"</pre>";
+};
+</script>
+</body>
+</html>
